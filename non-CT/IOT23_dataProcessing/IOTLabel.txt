@@ -1,0 +1,13 @@
+id.orig_h
+id.orig_p
+id.resp_h
+id.resp_p
+proto
+service
+conn_state
+missed_bytes
+history
+orig_pkts
+orig_ip_bytes
+resp_pkts
+resp_ip_bytes
