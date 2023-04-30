@@ -26,4 +26,5 @@ for chunk in data_tst:
         new_ip = ip2decimalism(i)
         chunk['id.resp_h'] = chunk['id.resp_h'].replace(i, new_ip)
     print(Counter(chunk['id.resp_h']))
+    print(chunk)
     chunk.to_csv('output_combine.csv', mode='a', index=False, header=False)
