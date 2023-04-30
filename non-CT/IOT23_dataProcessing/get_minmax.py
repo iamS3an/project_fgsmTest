@@ -22,7 +22,7 @@ for file in files:
     data_tst = pd.read_table(file, names=IOTLabel, header=None, sep=',', comment='#', index_col=False, engine='python',chunksize=50000)
 
     for chunk in data_tst:
-
+        print(chunk)
         chunk_max_list = []
         chunk_min_list = []
 
@@ -37,7 +37,6 @@ for file in files:
         print(min_list)
 
         print("-" * 30)"""
-
         chunk_max_df = pd.DataFrame(np.array(chunk_max_list), dtype='float64')
         chunk_min_df = pd.DataFrame(np.array(chunk_min_list), dtype='float64')
 
