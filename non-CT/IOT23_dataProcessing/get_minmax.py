@@ -10,41 +10,34 @@ def read_file_colName(FS_Fname): # 讀TXT的funtion
     return names
 
 IOTLabel = read_file_colName("IOTLabel.txt")# 用function讀TXT
-# print(IOTLabel)# TXT內容
-# print(len(IOTLabel)) # TXT有幾行
-
-files = glob('*.csv')#合併檔案用['onehot_1.csv', 'onehot_3.csv']
-# print(files)
 
 
-#多檔
-for file in files:
-    data_tst = pd.read_table(file, names=IOTLabel, header=None, sep=',', comment='#', index_col=False, engine='python',chunksize=50000)
+data_tst = pd.read_table("output_combine.csv", names=IOTLabel, header=None, sep=',', comment='#', index_col=False, engine='python',chunksize=50000)
 
-    for chunk in data_tst:
-        print(chunk)
-        chunk_max_list = []
-        chunk_min_list = []
+for chunk in data_tst:
+    print(chunk)
+    chunk_max_list = []
+    chunk_min_list = []
 
-        chunk_max_data = chunk.max()
-        chunk_min_data = chunk.min()
+    chunk_max_data = chunk.max()
+    chunk_min_data = chunk.min()
 
 
-        chunk_max_list.append(chunk_max_data.tolist())
-        chunk_min_list.append(chunk_min_data.tolist())
+    chunk_max_list.append(chunk_max_data.tolist())
+    chunk_min_list.append(chunk_min_data.tolist())
 
-        """print(max_list)
-        print(min_list)
+    """print(max_list)
+    print(min_list)
 
-        print("-" * 30)"""
-        chunk_max_df = pd.DataFrame(np.array(chunk_max_list), dtype='float64')
-        chunk_min_df = pd.DataFrame(np.array(chunk_min_list), dtype='float64')
+    print("-" * 30)"""
+    chunk_max_df = pd.DataFrame(np.array(chunk_max_list), dtype='float64')
+    chunk_min_df = pd.DataFrame(np.array(chunk_min_list), dtype='float64')
 
-        chunk_max_df.to_csv("chunk_max.csv",mode= 'a', index=None, header=None)
-        chunk_min_df.to_csv("chunk_min.csv",mode= 'a', index=None, header=None)
+    chunk_max_df.to_csv("chunk_max.csv",mode= 'a', index=None, header=None)
+    chunk_min_df.to_csv("chunk_min.csv",mode= 'a', index=None, header=None)
 
-        print(chunk_max_df)
-        print(chunk_min_df)
+    print(chunk_max_df)
+    print(chunk_min_df)
 
 
 

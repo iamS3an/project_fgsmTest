@@ -38,9 +38,6 @@ for val in label_list:
     data_tst['label'].replace(val, label_list.index(val), inplace=True)
 print(Counter(data_tst['label']))
 
-data_tst = data_tst.sample(frac=1)
-print(data_tst)
-
 data_tst['label'].to_csv('2label_combine.csv', mode='w', index=False, header=False)
 data_tst = data_tst.drop('label', axis=1)
 print(data_tst)
