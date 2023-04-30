@@ -28,7 +28,7 @@ max_data = maxdata_tst.squeeze()
 
 #多檔 標準化到0.1間
 for file in files:
-    data_tst = pd.read_table(file, names=IOTLabel, header=None, sep=',', comment='#', index_col=False, engine='python',chunksize=5000)
+    data_tst = pd.read_table(file, names=IOTLabel, header=None, sep=',', comment='#', index_col=False, engine='python',chunksize=50000)
 
     for chunk in data_tst:
         # print(chunk['local_orig'])

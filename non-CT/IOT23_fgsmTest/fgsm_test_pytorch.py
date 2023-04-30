@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 import numpy as np
 import pandas as pd
-# from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
 from torchmetrics.classification import BinaryAccuracy
 # import time
@@ -17,7 +17,7 @@ if device.type == 'cuda':
 data_tst = pd.read_table('normalize_combine.csv', sep=',', header=None, comment='#', engine='python')
 label_data = pd.read_table('2label_combine.csv', sep=',', header=None, comment='#', engine='python')
 
-# X_train, X_test, Y_train, Y_test = train_test_split(data_tst, label_data, test_size=0.2, random_state=1)
+X_train, X_test, Y_train, Y_test = train_test_split(data_tst, label_data, test_size=0.1, random_state=1)
 x, y = shuffle(data_tst, label_data, random_state=1)
 
 
@@ -40,8 +40,11 @@ class DNN(nn.Module):
         super(DNN, self).__init__()
         self.fc = nn.Sequential(
             nn.Linear(input_dim, input_dim),
-            nn.ReLU(),
-            nn.Linear(input_dim, 1),    
+            nn.BatchNorm1d(input_dim),
+            nn.LeakyReLU(),
+            nn.Linear(input_dim, 4),    
+            nn.LeakyReLU(),
+            nn.Linear(4, 1),    
             nn.Sigmoid()
         )
 
@@ -54,14 +57,14 @@ model = DNN().to(device)
 criterion = nn.BCELoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-num_epoch = 1
+num_epoch = 100
 batch_size = 256
 
-train_set = IOT23Dataset(dfX=x, dfY=y)
+train_set = IOT23Dataset(dfX=X_train, dfY=Y_train)
 train_loader = DataLoader(dataset=train_set, batch_size=batch_size, shuffle=True)
 print("train_set: ", len(train_set))
 print("train_loader: ", len(train_loader))
-val_set = IOT23Dataset(dfX=x, dfY=y)
+val_set = IOT23Dataset(dfX=X_test, dfY=Y_test)
 val_loader = DataLoader(dataset=val_set, batch_size=batch_size)
 print("validate_set: ", len(val_set))
 print("validate_loader: ", len(val_loader))
@@ -91,35 +94,41 @@ for epoch in range(num_epoch):
         # v, train_pred = torch.max(outputs, 0)
         # train_corrects += (train_pred.cpu() == labels.cpu()).sum().item()
         # train_acc = float(train_corrects/len(train_set))
-        train_acc = acc(outputs, labels).item()
+        train_acc += acc(outputs, labels).item()
         train_loss += batch_loss.item()
-        if i % 10 == 9:  # 每 10 個 batch 輸出一次
-            print('Epoch: {}/{} [{:03d}/{:03d}] Acc: {:3.6f} loss: {:3.6f} Best: {:3.6f}'.format(epoch+1, num_epoch, i+1, len(train_loader), train_acc, batch_loss.item(), best_acc))
+        # if i % 1000 == 999:  # 每 100 個 batch 輸出一次
+        #     print('Epoch: {}/{} [{:03d}/{:03d}] Acc: {:3.6f} loss: {:3.6f} Best: {:3.6f}'.format(epoch+1, num_epoch, i+1, len(train_loader), train_acc, batch_loss.item(), best_acc))
+    train_acc = train_acc/len(train_loader)
+    train_loss = train_loss/len(train_loader)
+    print('Train: Acc={:3.6f} loss={:3.6f}'.format(train_acc, train_loss))
+    model.eval()
+    # val_corrects = 0
+    val_acc = 0.0
+    val_loss = 0.0
+    with torch.no_grad():
+        for i, data in enumerate(val_loader):
+            inputs, labels = data
+            inputs, labels = inputs.to(device), labels.to(device)
+            outputs = model(inputs)
+            batch_loss = criterion(outputs, labels) 
+            # _, val_pred = torch.max(outputs, 0)
+            # val_corrects += (val_pred.cpu() == labels.cpu()).sum().item()
+            # val_acc = float(val_corrects/len(val_set))
+            val_acc += acc(outputs, labels).item()
+            val_loss += batch_loss.item()
+    val_acc = val_acc/len(val_loader)
+    val_loss = val_loss/len(val_loader)
+    print('Valid: Acc={:3.6f} loss={:3.6f}'.format(val_acc, val_loss))
     if (train_acc >= best_acc):
         best_epoch = epoch + 1
         best_acc = train_acc
-        print("Model saving... at Epoch: {} Acc: {:3.6f}".format(best_epoch, best_acc))
+        print("Epoch: {}/{} Model saving at Epoch: {} Acc: {:3.6f}".format(epoch+1, num_epoch, best_epoch, best_acc))
         torch.save(model, 'model.pth')
-
+    else:
+        print("Epoch: {}/{} Last best model at Epoch: {} Acc: {:3.6f}".format(epoch+1, num_epoch, best_epoch, best_acc))
+    
+    
 model = torch.load('model.pth')            
-model.eval()
-print("Starting Validating...")
-# val_corrects = 0
-val_acc = 0.0
-val_loss = 0.0
-with torch.no_grad():
-    for i, data in enumerate(val_loader):
-        inputs, labels = data
-        inputs, labels = inputs.to(device), labels.to(device)
-        outputs = model(inputs)
-        batch_loss = criterion(outputs, labels) 
-        # _, val_pred = torch.max(outputs, 0)
-        # val_corrects += (val_pred.cpu() == labels.cpu()).sum().item()
-        # val_acc = float(val_corrects/len(val_set))
-        val_acc += acc(outputs, labels).item()
-        val_loss += batch_loss.item()
-    print('Acc: {:3.6f} loss: {:3.6f}'.format(val_acc/len(val_loader), val_loss/len(val_loader)))
-
 model.eval()
 print("Starting Testing...")
 # test_corrects = 0
