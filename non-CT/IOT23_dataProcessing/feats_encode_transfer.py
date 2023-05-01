@@ -5,7 +5,7 @@ from collections import Counter
 data_tst = pd.read_table('combine.csv', header=0, sep=',', comment='#', index_col=False, engine='python')
 print(data_tst)
 
-data_tst = data_tst.drop(['tunnel_parents', 'label detailed-label'], axis=1)
+data_tst = data_tst.drop(['label detailed-label'], axis=1)
 print(data_tst)
 
 proto_list = list(Counter(data_tst['proto']).keys())
@@ -31,6 +31,12 @@ print(history_list)
 for val in history_list:
     data_tst['history'].replace(val, history_list.index(val), inplace=True)
 print(Counter(data_tst['history']))
+
+tunnel_parents_list = list(Counter(data_tst['tunnel_parents']).keys())
+print(tunnel_parents_list)
+for val in tunnel_parents_list:
+    data_tst['tunnel_parents'].replace(val, tunnel_parents_list.index(val), inplace=True)
+print(Counter(data_tst['tunnel_parents']))
 
 label_list = list(Counter(data_tst['label']).keys())
 print(label_list)
