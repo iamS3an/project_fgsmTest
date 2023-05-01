@@ -68,7 +68,7 @@ print("Starting Testing...")
 eps_list = list(np.arange(0.0001, 0.1, 0.0001))
 for eps in eps_list:
     test_acc = 0.0
-    test_loss = 0.0
+    # test_loss = 0.0
     for i, data in enumerate(test_loader):
         inputs, labels = data
         inputs, labels = inputs.to(device), labels.to(device)
@@ -79,14 +79,18 @@ for eps in eps_list:
         batch_loss.backward() 
         data_grad = inputs.grad.data
         adv = inputs + eps * data_grad.sign()
-        # 如要儲存對抗樣本 將下面這行打開
+        # 如要儲存對抗樣本跟原始樣本 將下面打開
+        # 儲存原始樣本
+        # pd.DataFrame(inputs.cpu().detach().numpy()).to_csv("origin.csv", header=False, index=False, mode='a')
+        # 儲存對抗樣本
         # pd.DataFrame(adv.cpu().detach().numpy()).to_csv("eps={}_adv.csv".format(eps), header=False, index=False, mode='a')
-        outputs = model(adv)
+        adv_outputs = model(adv)
         # _, test_pred = torch.max(outputs, 0)
         # test_corrects += (test_pred.cpu() == labels.cpu()).sum().item()
         # test_acc = float(test_corrects/len(test_set))
-        test_acc += acc(outputs, labels).item()
-        test_loss += batch_loss.item()
+        test_acc += acc(adv_outputs, labels).item()
+        # test_loss += batch_loss.item()
         # if i % 10 == 9:  # 每 10 個 batch 輸出一次
         #     print('[{:03d}/{:03d}] Acc: {:3.6f} loss: {:3.6f}'.format(i+1, len(test_loader), acc(outputs, labels).item(), batch_loss.item()))
-    print('eps={} Acc: {:3.6f}'.format(eps, test_acc/len(test_loader)))
+    test_acc = test_acc/len(test_loader)
+    print('eps={} Acc: {:3.6f}'.format(eps, test_acc))
