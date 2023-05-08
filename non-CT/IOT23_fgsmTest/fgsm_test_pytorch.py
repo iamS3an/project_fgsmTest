@@ -11,8 +11,10 @@ from torchmetrics.classification import BinaryAccuracy
 
 
 device = torch.device("cuda" if (torch.cuda.is_available()) else "cpu")
-if device.type == 'cuda':
-    print(torch.cuda.get_device_name(0))
+device = torch.device("mps" if (torch.backends.mps.is_available()) else "cpu")
+print(device)
+# if device.type == 'cuda':
+#     print(torch.cuda.get_device_name(0))
 
 data_tst = pd.read_table('normalize_combine.csv', sep=',', header=None, comment='#', engine='python')
 label_data = pd.read_table('2label_combine.csv', sep=',', header=None, comment='#', engine='python')

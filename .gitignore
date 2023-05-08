@@ -2,3 +2,4 @@
 *.pth
 *.labeled
 test/
+*.DS_Store
