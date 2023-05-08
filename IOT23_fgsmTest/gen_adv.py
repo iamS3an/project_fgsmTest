@@ -10,8 +10,10 @@ from torchmetrics.classification import BinaryAccuracy
 
 
 device = torch.device("cuda" if (torch.cuda.is_available()) else "cpu")
-if device.type == 'cuda':
-    print(torch.cuda.get_device_name(0))
+device = torch.device("mps" if (torch.backends.mps.is_available()) else "cpu")
+print(device)
+# if device.type == 'cuda':
+#     print(torch.cuda.get_device_name(0))
 
 data_tst = pd.read_table('normalize_combine.csv', sep=',', header=None, comment='#', engine='python')
 label_data = pd.read_table('2label_combine.csv', sep=',', header=None, comment='#', engine='python')
@@ -53,7 +55,7 @@ class DNN(nn.Module):
 model = DNN().to(device)
 criterion = nn.BCELoss()
 optimizer = optim.Adam(model.parameters(), lr=0.0001, weight_decay=0.001)
-batch_size = 512
+batch_size = 256
 acc = BinaryAccuracy().to(device)
 
 test_set = IOT23Dataset(dfX=x, dfY=y)

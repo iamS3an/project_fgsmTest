@@ -58,10 +58,10 @@ class DNN(nn.Module):
 model = DNN().to(device)
 criterion = nn.BCELoss()
 optimizer = optim.Adam(model.parameters(), lr=0.0001, weight_decay=0.001)
-batch_size = 512
+batch_size = 256
 acc = BinaryAccuracy().to(device)
 
-num_epoch = 1000
+num_epoch = 500
 
 train_set = IOT23Dataset(dfX=X_train, dfY=Y_train)
 train_loader = DataLoader(dataset=train_set, batch_size=batch_size, shuffle=True)
