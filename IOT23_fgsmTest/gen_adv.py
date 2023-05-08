@@ -54,7 +54,7 @@ class DNN(nn.Module):
         
 model = DNN().to(device)
 criterion = nn.BCELoss()
-optimizer = optim.Adam(model.parameters(), lr=0.0001, weight_decay=0.001)
+optimizer = optim.Adam(model.parameters(), lr=0.00001, weight_decay=0.001)
 batch_size = 256
 acc = BinaryAccuracy().to(device)
 
@@ -67,7 +67,7 @@ model = torch.load('model.pth')
 model.eval()
 print("Starting Testing...")
 # test_corrects = 0
-eps_list = list(np.arange(0.0001, 0.1, 0.0001))
+eps_list = list(np.arange(0.001, 0.101, 0.001))
 for eps in eps_list:
     test_acc = 0.0
     # test_loss = 0.0
