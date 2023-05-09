@@ -9,9 +9,15 @@ from sklearn.utils import shuffle
 from torchmetrics.classification import BinaryAccuracy
 
 
-device = torch.device("cuda" if (torch.cuda.is_available()) else "cpu")
-device = torch.device("mps" if (torch.backends.mps.is_available()) else "cpu")
-print(device)
+if torch.backends.mps.is_available():
+    device = "mps"
+    print(device)
+elif torch.cuda.is_available():
+    device = "cuda"
+    print(torch.cuda.get_device_name(0))
+else:
+    device = "cpu"
+    print(device)
 # if device.type == 'cuda':
 #     print(torch.cuda.get_device_name(0))
 
