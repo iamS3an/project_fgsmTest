@@ -25,6 +25,9 @@ data_tst = pd.read_table('normalize_combine.csv', sep=',', header=None, comment=
 label_data = pd.read_table('2label_combine.csv', sep=',', header=None, comment='#', engine='python')
 
 x, y = shuffle(data_tst, label_data, random_state=1)
+# 儲存原始樣本
+# x.to_csv("origin.csv", header=False, index=False, mode='w')
+# y.to_csv("label.csv", header=False, index=False, mode='w')
 
 class IOT23Dataset(Dataset):
 
@@ -87,9 +90,6 @@ for eps in eps_list:
         batch_loss.backward() 
         data_grad = inputs.grad.data
         adv = inputs + eps * data_grad.sign()
-        # 如要儲存對抗樣本跟原始樣本 將下面打開
-        # 儲存原始樣本
-        # pd.DataFrame(inputs.cpu().detach().numpy()).to_csv("origin.csv", header=False, index=False, mode='a')
         # 儲存對抗樣本
         # pd.DataFrame(adv.cpu().detach().numpy()).to_csv("eps={}_adv.csv".format(eps), header=False, index=False, mode='a')
         adv_outputs = model(adv)
