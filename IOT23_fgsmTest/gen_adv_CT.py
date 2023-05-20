@@ -21,7 +21,7 @@ else:
 # if device.type == 'cuda':
 #     print(torch.cuda.get_device_name(0))
 
-data_tst = pd.read_table('normalize_combine.csv', sep=',', header=None, comment='#', engine='python')
+data_tst = pd.read_table('normalize_combine_CT.csv', sep=',', header=None, comment='#', engine='python')
 label_data = pd.read_table('2label_combine.csv', sep=',', header=None, comment='#', engine='python')
 
 x, y = shuffle(data_tst, label_data, random_state=1)
@@ -65,14 +65,14 @@ optimizer = optim.RAdam(model.parameters(), lr=0.00001)
 batch_size = 256
 acc = BinaryAccuracy().to(device)
 test_set = IOT23Dataset(dfX=x, dfY=y)
-pd.Series(0, dtype=int, index=np.arange(len(test_set))).to_csv("adv_label.csv", header=False, index=False, mode='w')
-pd.Series(1, dtype=int, index=np.arange(len(test_set))).to_csv("adv_label.csv", header=False, index=False, mode='a')
+# pd.Series(0, dtype=int, index=np.arange(len(test_set))).to_csv("adv_label.csv", header=False, index=False, mode='w')
+# pd.Series(1, dtype=int, index=np.arange(len(test_set))).to_csv("adv_label.csv", header=False, index=False, mode='a')
 test_loader = DataLoader(dataset=test_set, batch_size=batch_size)
 
 print("test_set: ", len(test_set))
 print("test_loader: ", len(test_loader))
 
-model = torch.load('model.pth')            
+model = torch.load('model_CT.pth')            
 model.eval()
 print("Starting Testing...")
 # test_corrects = 0
@@ -80,7 +80,7 @@ eps_list = list(np.arange(0, 0.101, 0.001))
 for eps in eps_list:
     if (eps * 1000) % 10 == 0:
         # 儲存原始樣本
-        x.to_csv("eps={:1.2f}_adv_concat.csv".format(eps), header=False, index=False, mode='w')
+        x.to_csv("eps={:1.2f}_adv_concat_CT.csv".format(eps), header=False, index=False, mode='w')
     test_acc = 0.0
     # test_loss = 0.0
     for i, data in enumerate(test_loader):
@@ -95,7 +95,7 @@ for eps in eps_list:
         adv = inputs + eps * data_grad.sign()
         if (eps * 1000) % 10 == 0:
             # 儲存對抗樣本
-            pd.DataFrame(adv.cpu().detach().numpy()).to_csv("eps={:1.2f}_adv_concat.csv".format(eps), header=False, index=False, mode='a')
+            pd.DataFrame(adv.cpu().detach().numpy()).to_csv("eps={:1.2f}_adv_concat_CT.csv".format(eps), header=False, index=False, mode='a')
         adv_outputs = model(adv)
         # _, test_pred = torch.max(outputs, 0)
         # test_corrects += (test_pred.cpu() == labels.cpu()).sum().item()
@@ -106,5 +106,5 @@ for eps in eps_list:
         #     print('[{:03d}/{:03d}] Acc: {:3.6f} loss: {:3.6f}'.format(i+1, len(test_loader), acc(outputs, labels).item(), batch_loss.item()))
     test_acc = test_acc/len(test_loader)
     print('eps={:1.3f} Acc: {:1.6f}'.format(eps, test_acc))
-    with open('eps_effect.txt', 'a') as f:
+    with open('eps_effect_CT.txt', 'a') as f:
         f.write('eps={:1.3f} Acc: {:1.6f}\n'.format(eps, test_acc))
